@@ -32,7 +32,7 @@ class AlphaVantageVoo {
 
     /* 公開方法 */
     /* 取得收盤價 */
-    public static function getClose(): float|null {
+    public static function getClose() {
         /* 收盤價 讀取本地資料 */
         $close = self::load_local_data();
         if ($close === null) {
@@ -42,7 +42,7 @@ class AlphaVantageVoo {
         return $close;
     }
 
-    private static function load_online_data(): float|null {
+    private static function load_online_data() {
         try {
             $close = null;
             $json = file_get_contents('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&datatype=json&symbol=' . self::$symbol . '&apikey=' . self::$apiKey);
@@ -61,7 +61,7 @@ class AlphaVantageVoo {
         }
     }
 
-    private static function load_local_data(): float|null {
+    private static function load_local_data() {
         try {
             $close = null;
             
@@ -82,7 +82,7 @@ class AlphaVantageVoo {
         }
     }
 
-    private static function find_latest_time_series_close(string $lastRefreshed, array $timeSeries): float|null {
+    private static function find_latest_time_series_close($lastRefreshed, $timeSeries) {
         $close = null;
         try {
             if (key_exists($lastRefreshed, $timeSeries)) {
