@@ -8,27 +8,27 @@
  */
 
 class AlphaVantageVoo {
-    private static string $apiKey = '';
+    private static $apiKey = '';
     /* 本地資料存放位置 */
-    private static string $localDataPath = './alpha_vantage_voo.json';
+    private static $localDataPath = './alpha_vantage_voo.json';
     /* 查詢代號 */
-    private static string $symbol = 'VOO';
+    private static $symbol = 'VOO';
 
     /* 常數 */
     /* 欄位 資料日期 */
-    private const FIELD_FETCH_DATE =  'fetch_date';
+    private static $FIELD_FETCH_DATE =  'fetch_date';
     /* 層二：Meta Data */
-    private const SUB_META_DATA = 'Meta Data';
+    private static $SUB_META_DATA = 'Meta Data';
     /* 層三：Meta Data -> 3. Last Refreshed（日期: Y-m-d）*/
-    private const META_DATA_LAST_REFRESHED = '3. Last Refreshed';
+    private static $META_DATA_LAST_REFRESHED = '3. Last Refreshed';
     /* 層二：Time Series (Daily) */
-    private const SUB_TIME_SERIES = 'Time Series (Daily)';
+    private static $SUB_TIME_SERIES = 'Time Series (Daily)';
     /* Time Series 之下是一個以「日期」為鍵值對應到每日資料「物件」的「字典」結構 */
-    private const TIME_SERIES_OPEN =    '1. open';
-    private const TIME_SERIES_HIGH =    '2. high';
-    private const TIME_SERIES_LOW =     '3. low';
-    private const TIME_SERIES_CLOSE =   '4. close';
-    private const TIME_SERIES_VOLUME =  '5. volume';
+    private static $TIME_SERIES_OPEN =    '1. open';
+    private static $TIME_SERIES_HIGH =    '2. high';
+    private static $TIME_SERIES_LOW =     '3. low';
+    private static $TIME_SERIES_CLOSE =   '4. close';
+    private static $TIME_SERIES_VOLUME =  '5. volume';
 
     /* 公開方法 */
     /* 取得收盤價 */
@@ -48,13 +48,13 @@ class AlphaVantageVoo {
             $json = file_get_contents('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&datatype=json&symbol=' . self::$symbol . '&apikey=' . self::$apiKey);
             $data = json_decode($json, true);
             /* 註記本日日期 */
-            $data[self::FIELD_FETCH_DATE] = date('Y-m-d');
+            $data[self::$FIELD_FETCH_DATE] = date('Y-m-d');
 
             /* 寫入本地資料 */
             file_put_contents(self::$localDataPath, json_encode($data));
 
-            $lastRefreshed = $data[self::SUB_META_DATA][self::META_DATA_LAST_REFRESHED];
-            $close = self::find_latest_time_series_close($lastRefreshed, $data[self::SUB_TIME_SERIES]);
+            $lastRefreshed = $data[self::$SUB_META_DATA][self::$META_DATA_LAST_REFRESHED];
+            $close = self::find_latest_time_series_close($lastRefreshed, $data[self::$SUB_TIME_SERIES]);
 
         } finally {
             return $close;
@@ -71,9 +71,9 @@ class AlphaVantageVoo {
                 /* 讀取本地資料 */
                 $localData = json_decode(file_get_contents(self::$localDataPath), true);
                 /* 判斷資料日期是否為最新資料 */
-                if ($localData[self::FIELD_FETCH_DATE] == date('Y-m-d')) {
-                    $lastRefreshed = $localData[self::SUB_META_DATA][self::META_DATA_LAST_REFRESHED];
-                    $close = self::find_latest_time_series_close($lastRefreshed, $localData[self::SUB_TIME_SERIES]);
+                if ($localData[self::$FIELD_FETCH_DATE] == date('Y-m-d')) {
+                    $lastRefreshed = $localData[self::$SUB_META_DATA][self::$META_DATA_LAST_REFRESHED];
+                    $close = self::find_latest_time_series_close($lastRefreshed, $localData[self::$SUB_TIME_SERIES]);
                 }
             }
 
@@ -86,7 +86,7 @@ class AlphaVantageVoo {
         $close = null;
         try {
             if (key_exists($lastRefreshed, $timeSeries)) {
-                $close = floatval($timeSeries[$lastRefreshed][self::TIME_SERIES_CLOSE]);
+                $close = floatval($timeSeries[$lastRefreshed][self::$TIME_SERIES_CLOSE]);
             }
             /* 依鍵值由大到小排序 */
             ksort($timeSeries);
@@ -94,7 +94,7 @@ class AlphaVantageVoo {
             while (!empty($timeSeries)) {
                 /* 使用 array_shift() 從第 0 位彈出元素 */
                 $daily = array_shift($timeSeries);
-                $close = floatval($daily[self::TIME_SERIES_CLOSE]);
+                $close = floatval($daily[self::$TIME_SERIES_CLOSE]);
             }
         } finally {
             return $close;
